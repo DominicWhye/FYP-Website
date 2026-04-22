@@ -17,8 +17,20 @@ const ALLOWED_CONTENT_TYPES = [
   "text/*",
 ];
 
-function jsonError(message, status = 400) {
-  return Response.json({ error: message }, { status });
+function sendJson(response, status, payload) {
+  response.status(status).json(payload);
+}
+
+function getJsonBody(request) {
+  if (request.body && typeof request.body === "object") {
+    return request.body;
+  }
+
+  if (typeof request.body === "string") {
+    return JSON.parse(request.body);
+  }
+
+  return {};
 }
 
 function parseMetadata(clientPayload) {
@@ -33,17 +45,19 @@ function parseMetadata(clientPayload) {
   }
 }
 
-export default async function handler(request) {
+export default async function handler(request, response) {
   if (request.method !== "POST") {
-    return jsonError("Method not allowed.", 405);
+    sendJson(response, 405, { error: "Method not allowed." });
+    return;
   }
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return jsonError("Missing BLOB_READ_WRITE_TOKEN in Vercel environment variables.", 500);
+    sendJson(response, 500, { error: "Missing BLOB_READ_WRITE_TOKEN in Vercel environment variables." });
+    return;
   }
 
   try {
-    const body = await request.json();
+    const body = getJsonBody(request);
 
     const jsonResponse = await handleUpload({
       body,
@@ -74,13 +88,12 @@ export default async function handler(request) {
           }),
         };
       },
-      onUploadCompleted: async () => {
-        return;
-      },
     });
 
-    return Response.json(jsonResponse);
+    sendJson(response, 200, jsonResponse);
   } catch (error) {
-    return jsonError(error.message || "Failed to generate Vercel Blob client upload token.");
+    sendJson(response, 400, {
+      error: error.message || "Failed to generate Vercel Blob client upload token.",
+    });
   }
 }

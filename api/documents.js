@@ -3,8 +3,20 @@ import { del, list, put } from "@vercel/blob";
 const DOCUMENT_PREFIX = "documents/";
 const METADATA_PREFIX = "document-metadata/";
 
-function jsonError(message, status = 400) {
-  return Response.json({ error: message }, { status });
+function sendJson(response, status, payload) {
+  response.status(status).json(payload);
+}
+
+function getJsonBody(request) {
+  if (request.body && typeof request.body === "object") {
+    return request.body;
+  }
+
+  if (typeof request.body === "string") {
+    return JSON.parse(request.body);
+  }
+
+  return {};
 }
 
 function normalizeText(value, fallback = "") {
@@ -47,7 +59,7 @@ async function getDocuments() {
 }
 
 async function saveDocument(request) {
-  const body = await request.json();
+  const body = getJsonBody(request);
   const title = normalizeText(body.title);
   const category = normalizeText(body.category, "Other");
   const notes = normalizeText(body.notes);
@@ -55,15 +67,15 @@ async function saveDocument(request) {
   const blob = body.blob || {};
 
   if (!title) {
-    return jsonError("Document title is required.");
+    return { status: 400, payload: { error: "Document title is required." } };
   }
 
   if (!filename) {
-    return jsonError("Filename is required.");
+    return { status: 400, payload: { error: "Filename is required." } };
   }
 
   if (!isDocumentPathname(blob.pathname)) {
-    return jsonError("Uploaded file was not stored in the expected documents folder.");
+    return { status: 400, payload: { error: "Uploaded file was not stored in the expected documents folder." } };
   }
 
   const id = crypto.randomUUID();
@@ -93,20 +105,20 @@ async function saveDocument(request) {
     cacheControlMaxAge: 60,
   });
 
-  return Response.json(document, { status: 201 });
+  return { status: 201, payload: document };
 }
 
 async function deleteDocument(request) {
-  const body = await request.json();
+  const body = getJsonBody(request);
   const metadataPathname = normalizeText(body.metadataPathname || (body.id ? createMetadataPathname(body.id) : ""));
   const filePathname = normalizeText(body.filePathname);
 
   if (!isMetadataPathname(metadataPathname)) {
-    return jsonError("Valid metadata path is required.");
+    return { status: 400, payload: { error: "Valid metadata path is required." } };
   }
 
   if (filePathname && !isDocumentPathname(filePathname)) {
-    return jsonError("Invalid document path.");
+    return { status: 400, payload: { error: "Invalid document path." } };
   }
 
   const deleteTargets = [metadataPathname];
@@ -116,28 +128,33 @@ async function deleteDocument(request) {
   const failed = results.find((result) => result.status === "rejected");
 
   if (failed) {
-    return jsonError("Document could not be fully deleted. Please try again.", 500);
+    return { status: 500, payload: { error: "Document could not be fully deleted. Please try again." } };
   }
 
-  return Response.json({ message: "Document deleted." });
+  return { status: 200, payload: { message: "Document deleted." } };
 }
 
-export default async function handler(request) {
+export default async function handler(request, response) {
   try {
     if (request.method === "GET") {
-      return Response.json(await getDocuments());
+      sendJson(response, 200, await getDocuments());
+      return;
     }
 
     if (request.method === "POST") {
-      return saveDocument(request);
+      const result = await saveDocument(request);
+      sendJson(response, result.status, result.payload);
+      return;
     }
 
     if (request.method === "DELETE") {
-      return deleteDocument(request);
+      const result = await deleteDocument(request);
+      sendJson(response, result.status, result.payload);
+      return;
     }
 
-    return jsonError("Method not allowed.", 405);
+    sendJson(response, 405, { error: "Method not allowed." });
   } catch (error) {
-    return jsonError(error.message || "Document request failed.", 500);
+    sendJson(response, 500, { error: error.message || "Document request failed." });
   }
 }
