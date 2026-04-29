@@ -87,7 +87,7 @@
           <p class="eyebrow">Background</p>
           <h2>Attendance should feel invisible</h2>
           <p>
-            Traditional attendance methods can create avoidable admin work, and leave room for
+            Traditional attendance methods can create avoidable admin work and leave room for
             inaccurate records
           </p>
         </div>
@@ -119,7 +119,7 @@
           />
           <div class="visual-label">
             <span>AI Recognition Pipeline</span>
-            <strong>MTCNN + FaceNet</strong>
+            <strong>SCRFD + ArcFace</strong>
           </div>
         </div>
 
@@ -134,7 +134,7 @@
           <div class="objective-list">
             <div>
               <strong>Real-time AI</strong>
-              <span>Face detection and recognition using MTCNN and FaceNet</span>
+              <span>Face detection and recognition using SCRFD and ArcFace</span>
             </div>
             <div>
               <strong>Higher accuracy</strong>
@@ -143,6 +143,10 @@
             <div>
               <strong>Lecturer friendly</strong>
               <span>Attendance monitoring designed for fast class-level review</span>
+            </div>
+            <div>
+              <strong>AI Tuned</strong>
+              <span>GAN AI model fine tunes the detector threshold to improve accuracy</span>
             </div>
           </div>
         </div>
@@ -161,7 +165,7 @@
           </article>
           <article class="objective-card reveal">
             <h3>Face detection pipeline</h3>
-            <p>Implement real-time face detection and recognition with MTCNN and FaceNet</p>
+            <p>Implement real-time face detection and recognition with SCRFD and ArcFace</p>
           </article>
           <article class="objective-card reveal">
             <h3>Proxy prevention</h3>
@@ -211,6 +215,11 @@
             <h3>Smart classroom integration</h3>
             <p>Designed for future use with cameras, campus systems and access control</p>
           </article>
+          <article class="feature-card reveal">
+            <span>07</span>
+            <h3>GAN AI generator</h3>
+            <p>GAN AI model generates synthetic face images to fine-tune the recognition model</p>
+          </article>
         </div>
       </section>
 
@@ -228,12 +237,12 @@
           </div>
           <div class="workflow-step reveal">
             <span>2</span>
-            <h3>MTCNN detects and aligns</h3>
+            <h3>SCRFD detects and aligns</h3>
             <p>The face is located, cropped and prepared for recognition</p>
           </div>
           <div class="workflow-step reveal">
             <span>3</span>
-            <h3>FaceNet creates embeddings</h3>
+            <h3>ArcFace creates embeddings</h3>
             <p>The face is converted into a compact identity representation</p>
           </div>
           <div class="workflow-step reveal">
@@ -258,9 +267,9 @@
         <div class="stack-cloud reveal" aria-label="Technology stack">
           <span>Python</span>
           <span>OpenCV</span>
-          <span>DeepFace</span>
-          <span>MTCNN</span>
-          <span>FaceNet</span>
+          <span>StyleGAN</span>
+          <span>SCRFD</span>
+          <span>ArcFace</span>
           <span>Flask / FastAPI</span>
           <span>PostgreSQL / MongoDB</span>
           <span>HTML</span>
@@ -274,7 +283,7 @@
           <p class="eyebrow">Market Relevance</p>
           <h2>Aligned with real-world identity and access systems.</h2>
           <p>
-            Facial recognition is already used in smart campuses, security systems, access control, e-gates, and
+            Facial recognition is already used in smart campuses, security systems, access control, e-gates and
             identity verification. This project brings that direction into a focused academic use case
           </p>
         </div>
